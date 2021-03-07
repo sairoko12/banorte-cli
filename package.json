@@ -1,0 +1,30 @@
+{
+  "name": "banorte-cli",
+  "version": "1.0.0",
+  "description": "Scraper of Banorte bank",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha test/**/*.spec.js --exit --reporter=nyan"
+  },
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "author": "sairoko12",
+  "license": "ISC",
+  "homepage": "",
+  "dependencies": {
+    "chalk": "^4.1.0",
+    "dotenv": "^8.2.0",
+    "inquirer": "^8.0.0",
+    "loading-cli": "^1.1.0",
+    "puppeteer": "^8.0.0"
+  },
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "chai-http": "^4.3.0",
+    "faker": "^4.1.0",
+    "mocha": "^6.1.4",
+    "morgan": "^1.9.1"
+  }
+}
