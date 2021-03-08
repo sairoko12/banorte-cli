@@ -6,6 +6,10 @@ const {
     getTextFromElement
 } = require('./utils')
 
+const {
+    logWarning
+} = require('../utils')
+
 const putUserName = async (page, userName, userSelector, userSubmitSelector) => {
     try {
         await waitElement(page, userSelector)
@@ -51,8 +55,7 @@ const putPasswordAndToken = async (page, password, token, passwordLoginSelector,
     try {
         await page.type(passwordLoginSelector, password)
         await page.type(tokenLoginSelector, token)
-
-        // await page.click(submitPasswordSelector)
+        await page.click(submitPasswordSelector)
 
         return page
     } catch (error) {
@@ -61,9 +64,55 @@ const putPasswordAndToken = async (page, password, token, passwordLoginSelector,
     }
 }
 
+const validatePasswordError = async (page, sessionErrorSelector) => {
+    try {
+        await page.waitForSelector(sessionErrorSelector, {
+            visible: true
+        })
+
+        const message = await getTextFromElement(page, `${sessionErrorSelector} > div.boxed > div.content > p`)
+
+        return message
+    } catch(error) {
+        return false
+    }
+}
+
+const validatePoupWindow = async (page, modalSelector, closeSelector, chalk) => {
+    try {
+        await page.waitForSelector(modalSelector, {
+            visible: true
+        })
+
+        await page.waitForSelector(closeSelector, {
+            visible: true
+        })
+
+        await page.click(closeSelector)
+    } catch (error) {
+        return page
+    }
+
+    return page
+}
+
+const waitMainView = async (page, accountsViewSelector) => {
+    try {
+        await page.waitForSelector(accountsViewSelector, {
+            visible: true
+        })
+    } catch (error) {
+        await takeScreenShot(page, 'load-accounts-view')
+        throw new Error("No se ha podido cargar tus pinches cuentas 🥲")
+    }
+}
+
 module.exports = {
     putUserName,
     getHiddenName,
     getToken,
-    putPasswordAndToken
+    putPasswordAndToken,
+    validatePasswordError,
+    validatePoupWindow,
+    waitMainView
 }

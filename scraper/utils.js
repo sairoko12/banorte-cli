@@ -1,6 +1,8 @@
 'use strict'
 
-const initializeBrowser = async (puppeteer) => await puppeteer.launch()
+const initializeBrowser = async (puppeteer) => await puppeteer.launch({
+    headless: false
+})
 
 const createPage = async (browser, pageSettings) => {
     const page = await browser.newPage()

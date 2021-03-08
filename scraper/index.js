@@ -1,4 +1,6 @@
 module.exports = {
     ...require('./steps'),
-    ...require('./utils')
+    ...require('./utils'),
+    ...require('./mappings'),
+    ...require('./actions')
 }

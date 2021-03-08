@@ -8,13 +8,19 @@ const {
     putUserName,
     getHiddenName,
     getToken,
-    putPasswordAndToken
+    putPasswordAndToken,
+    validatePasswordError,
+    validatePoupWindow,
+    waitMainView,
+    userActionsMapping,
+    closeSession
 } = require('./scraper')
 
 const {
     promptUser,
     promptToken,
-    promptPassword
+    promptPassword,
+    showMainMenu
 } = require('./prompts')
 
 const {
@@ -48,29 +54,51 @@ const createDependencies = async () => {
 
     logWarning(dependecies['chalk'], "🤖: No la compartas con nadie bb, sólo conmigo 😘")
 
-    const loader = startLoader(dependecies['loading'])
+    let loader = startLoader(dependecies['loading'])
     const newPage = await createPage(browser, settings['page'])
     const startPage = await pageGoToUrl(newPage, settings['urls']['start'])
 
     try {
-        const passwordPage = await putUserName(startPage, user, settings['userSelector'], settings['userSubmitSelector'])
-        const userMaskName = await getHiddenName(passwordPage, settings['hiddenNameSelector'])
-        const token = await getToken(passwordPage, settings['passwordSelector'], userMaskName)
+        const passwordPage = await putUserName(startPage, user, settings["userSelector"], settings["userSubmitSelector"])
+        const userMaskName = await getHiddenName(passwordPage, settings["hiddenNameSelector"])
+        const token = await getToken(passwordPage, settings["passwordSelector"], userMaskName)
 
         loader.stop()
 
         printToken(dependecies['chalk'], token)
 
-        const userToken = await promptToken(dependecies['inquirer'])
+        const userToken = await promptToken(dependecies["inquirer"])
         const accessPage = await putPasswordAndToken(
             passwordPage,
             password,
             userToken,
-            settings['passwordLoginSelector'],
-            settings['tokenLoginSelector'],
-            settings['submitPasswordSelector']
+            settings["passwordLoginSelector"],
+            settings["tokenLoginSelector"],
+            settings["submitPasswordSelector"]
         )
 
+        const hasLoginError = await validatePasswordError(accessPage, settings["sessionErrorSelector"])
+
+        console.log(hasLoginError)
+
+        const closeModalIfExists = await validatePoupWindow(accessPage, settings["modalSelector"], settings["closeSelector"], dependecies['chalk'])
+        const accountsPage = await waitMainView(closeModalIfExists, settings["accountsViewSelector"])
+        let userOption = null
+        let action = null
+
+        logSuccess(dependecies['chalk'], "🤖: Sesión iniciada correctamente")
+
+        while(userOption != "end_session") {
+            userOption = await showMainMenu(dependecies['inquirer'])
+            loader = startLoader(dependecies['loading'])
+            action = userActionsMapping[userOption]
+
+            await action(accountsPage, dependecies['chalk'], settings)
+
+            loader.stop()
+        }
+
+        logSuccess(dependecies['chalk'], "🤖: Adiós popo, ya cerre tu sesión!")
     } catch (error) {
         loader.stop()
         logError(dependecies['chalk'], `🤖: Ocurrió un error bastardo, y dice así: ${error.message}`)
