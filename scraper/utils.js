@@ -1,14 +1,30 @@
 'use strict'
 
-const initializeBrowser = async (puppeteer) => await puppeteer.launch({
-    headless: false
-})
+const userAgent = require('user-agents')
+const { executablePath } = require('puppeteer')
+
+const initializeBrowser = async (puppeteer, recaptchaPlugin, stealth, browserSettings, captchaSettings) => {
+    puppeteer.use(stealth())
+    puppeteer.use(
+        recaptchaPlugin({
+            provider: { id: captchaSettings["captchaProvider"], token: captchaSettings["captchaToken"] },
+            visualFeedback: true // colorize reCAPTCHAs (violet = detected, green = solved)
+        })
+    )
+
+    return await puppeteer.launch({
+        args: ['--no-sandbox'],
+        headless: browserSettings["headless"],
+        executablePath: executablePath(),
+    })
+}
 
 const createPage = async (browser, pageSettings) => {
     const page = await browser.newPage()
+    const userAgentToUse = userAgent.random().toString()
 
     await page.setViewport(pageSettings['viewPort'])
-    await page.setUserAgent(pageSettings['userAgent'])
+    await page.setUserAgent(userAgentToUse)
     await page.setDefaultTimeout(pageSettings['maxTimeOut'])
 
     return page
@@ -26,7 +42,7 @@ const takeScreenShot = async (page, description) => await page.screenshot({
 })
 
 const getTextFromElement = async (page, selector) => {
-    const text = await page.$eval(selector, element => element.textContent)
+    const text = await page.$eval(selector, element => element.textContent.trim())
     return text
 }
 

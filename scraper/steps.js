@@ -78,7 +78,8 @@ const validatePasswordError = async (page, sessionErrorSelector) => {
     }
 }
 
-const validatePoupWindow = async (page, modalSelector, closeSelector, chalk) => {
+const validatePoupWindow = async (page, modalSelector, closeSelector) => {
+    // await waitElement(page, submitPasswordSelector)
     try {
         await page.waitForSelector(modalSelector, {
             visible: true
@@ -96,11 +97,51 @@ const validatePoupWindow = async (page, modalSelector, closeSelector, chalk) => 
     return page
 }
 
+
+const getLastLoginDate = async (page, lastLoginSelector) => {
+    try {
+        console.log("Esperando que el elemento exista")
+        console.log(`selector ${lastLoginSelector}`)
+
+        const loginContainer = await page.evaluate((lastLoginSelector) => {
+            setTimeout(() => {
+                console.log(lastLoginSelector)
+                let container = document.querySelector(lastLoginSelector)
+                console.log(container)
+
+                if(typeof(container) != 'undefined' && container != null){
+
+                    return Promise.resolve(container.textContent.trim())
+                }
+
+                return Promise.resolve(false)
+            }, 3000)
+
+            clearTimeout
+        }, lastLoginSelector)
+
+        console.log(loginContainer)
+
+        await waitElement(page, lastLoginSelector)
+        console.log("El elemento si existe")
+        const lastLogin = await getTextFromElement(page, lastLoginSelector)
+        console.log(lastLogin)
+        return lastLogin
+    } catch (error) {
+        await takeScreenShot(page, 'load-last-login')
+        throw new Error("No se hizo login correctamente ☠️, ya mejor llevame diosito 🥲")
+    }
+}
+
+
 const waitMainView = async (page, accountsViewSelector) => {
     try {
         await page.waitForSelector(accountsViewSelector, {
-            visible: true
+            visible: true,
+            timeout: 10200
         })
+
+        return page
     } catch (error) {
         await takeScreenShot(page, 'load-accounts-view')
         throw new Error("No se ha podido cargar tus pinches cuentas 🥲")
@@ -114,5 +155,6 @@ module.exports = {
     putPasswordAndToken,
     validatePasswordError,
     validatePoupWindow,
-    waitMainView
+    waitMainView,
+    getLastLoginDate
 }

@@ -1,11 +1,13 @@
 const {
     queryBalance,
-    closeSession
+    closeSession,
+    queryAccounts
 } = require('./actions')
 
 const userActionsMapping = {
     query_balance: queryBalance,
-    end_session: closeSession
+    query_accounts: queryAccounts,
+    end_session: closeSession,
 }
 
 module.exports = {

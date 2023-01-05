@@ -2,20 +2,9 @@
 
 const { exec } = require('child_process')
 
-const logError = (chalk, message) => {
-    console.log(chalk.red(message))
-}
 
-const logSuccess = (chalk, message) => {
-    console.log(chalk.green(message))
-}
-
-const logWarning = (chalk, message) => {
-    console.log(chalk.yellow(message))
-}
-
-const printToken = (chalk, token) => {
-    logSuccess(chalk, `🤖: Ten el pinche código para generar el token "${chalk.underline.bgRed.black(token)}" metelo en la app`)
+const printToken = (logger, token, userName) => {
+    logger.success(`🤖: Hola ${userName}, ingresa este TOKEN "${logger.chalk.underline.bgRed.black(token)}" en la aplicación de Banorte.`)
 }
 
 const clearScreenshots = async () => await exec('rm -rf screenshots/*.jpg')
@@ -25,9 +14,6 @@ const startLoader = loading => {
 }
 
 module.exports = {
-    logError,
-    logSuccess,
-    logWarning,
     printToken,
     clearScreenshots,
     startLoader
